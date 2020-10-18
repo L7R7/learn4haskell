@@ -636,11 +636,10 @@ specifying complex expressions.
 -}
 
 sumLast2 :: Integral a => a -> a
-sumLast2 n = last + secondToLast
+sumLast2 n = lastDigit + secondToLast
   where
     absolute = abs n
-    last = absolute `mod` 10
-    withoutLast = absolute `div` 10
+    (withoutLast, lastDigit) = absolute `divMod` 10
     secondToLast = withoutLast `mod` 10
 
 
