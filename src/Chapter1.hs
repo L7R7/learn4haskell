@@ -665,7 +665,7 @@ aren't ready for this boss yet!
 firstDigit :: Integral a => a -> a
 firstDigit n
   | n >= 10 = firstDigit (n `div` 10)
-  | n < 0 = firstDigit(- n)
+  | n < 0 = firstDigit (- n)
   | otherwise = n
 
 
