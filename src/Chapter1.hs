@@ -549,8 +549,7 @@ mid x y z
   | x <= z && x >= y = x
   | y <= x && y >= z = y
   | y <= z && y >= x = y
-  | z <= x && z >= y = z
-  | otherwise = z -- should be: z <= y && z >= x = z
+  | otherwise = z -- should be: (z <= x && z >= y) || (z <= y && z >= x) = z
 
 {- |
 =⚔️= Task 8
