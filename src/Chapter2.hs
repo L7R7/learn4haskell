@@ -875,9 +875,11 @@ and reverses it.
   cheating!
 -}
 rewind :: [a] -> [a]
-rewind [] = []
-rewind (a : as) = rewind as ++ [a]
-
+rewind = go []
+  where
+    go :: [a] -> [a] -> [a]
+    go acc [] = acc
+    go acc (a : as) = go (a : acc) as
 
 {-
 You did it! Now it is time to open pull request with your changes
