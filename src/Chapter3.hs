@@ -548,10 +548,11 @@ countInhabitants :: City -> Int
 countInhabitants (City _ _ houses) = sum $ inhabitants <$> houses
 
 inhabitants :: House -> Int
-inhabitants (House One) = 1
-inhabitants (House Two) = 2
-inhabitants (House Three) = 3
-inhabitants (House Four) = 4
+inhabitants (House house) = case house of
+  One -> 1
+  Two -> 2
+  Three -> 3
+  Four -> 4
 
 {-
 =🛡= Newtypes
