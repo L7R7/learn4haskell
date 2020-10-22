@@ -70,6 +70,9 @@ Haskell has several different ways to create entirely new data types. Let's talk
 about them all and master our skill of data types construction.
 -}
 
+import Data.List.NonEmpty ((<|),  NonEmpty(..) )
+import qualified Data.List.NonEmpty as NE (drop, take)
+
 {- |
 =🛡= Type aliases
 
@@ -1143,7 +1146,7 @@ class Contestant a where
 data Knight = Knight {
   knightHealth :: Health,
   knightDefense :: Defense,
-  knightActions :: [KnightAction]
+  knightActions :: NonEmpty KnightAction
 } deriving Show
 
 data KnightAction = AttackContestant Attack | DrinkAHealthPotion Health | CastASpell Defense deriving Show
@@ -1152,29 +1155,27 @@ instance Contestant Knight where
   fightIsOver knight = knightHealth knight <= Health 0
   handleAttack knight attack = knight {knightHealth = calculateNewKnightHealth knight attack}
   applyNextAction k@(Knight health defense actions) contestant = case actions of
-    [] -> (k, contestant)
-    (AttackContestant attack : _) -> (k { knightActions = rotate actions}, handleAttack contestant attack)
-    (DrinkAHealthPotion moreHealth : _) -> (k { knightHealth = health + moreHealth, knightActions = rotate actions}, contestant)
-    (CastASpell moreDefense : _) -> (k { knightDefense = defense + moreDefense, knightActions = rotate actions}, contestant)
+    (AttackContestant attack :| _) -> (k { knightActions = rotate actions}, handleAttack contestant attack)
+    (DrinkAHealthPotion moreHealth :| _) -> (k { knightHealth = health + moreHealth, knightActions = rotate actions}, contestant)
+    (CastASpell moreDefense :| _) -> (k { knightDefense = defense + moreDefense, knightActions = rotate actions}, contestant)
 
 calculateNewKnightHealth :: Knight -> Attack -> Health
 calculateNewKnightHealth (Knight (Health health) (Defense defense) _) (Attack attack) = Health (health + defense - attack)
 
 data Monster = Monster {
   monsterHealth :: Health,
-  monsterActions :: [MonsterAction]
+  monsterActions :: NonEmpty MonsterAction
 } deriving Show
 
 data MonsterAction = Fight Attack | RunAway deriving Show
 
 instance Contestant Monster where
-  fightIsOver (Monster _ (RunAway:_)) = True
+  fightIsOver (Monster _ (RunAway:|_)) = True
   fightIsOver monster = monsterHealth monster <= 0
   handleAttack monster attack = monster {monsterHealth = calculateNewMonsterHealth monster attack}
   applyNextAction m@(Monster _ actions) contestant = case actions of
-    [] -> (m, contestant)
-    (Fight attack : _) -> (m { monsterActions = rotate actions}, handleAttack contestant attack)
-    (RunAway : _) -> (m, contestant)
+    (Fight attack :| _) -> (m { monsterActions = rotate actions}, handleAttack contestant attack)
+    (RunAway :| _) -> (m, contestant)
 
 calculateNewMonsterHealth :: Monster -> Attack -> Health
 calculateNewMonsterHealth (Monster (Health health) _) (Attack attack) = Health (health - attack)
@@ -1191,10 +1192,13 @@ fightContestants (a, b)
     (newA, newB) = applyNextAction a b
     (newB', newA') = applyNextAction newB newA
 
-rotate :: [a] -> [a]
-rotate as = (take len . drop 1 . cycle) as
+rotate :: NonEmpty a -> NonEmpty a
+rotate (a :| []) = a :| []
+rotate (a :| as) = go as (a :| [])
   where
-    len = length as
+    go :: [a] -> NonEmpty a -> NonEmpty a
+    go [] acc = acc
+    go (a': as') acc = go as' (a' <| acc)
 
 {-
 You did it! Now it is time to open pull request with your changes
