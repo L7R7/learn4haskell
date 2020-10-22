@@ -397,18 +397,13 @@ data Monster1 = Monster1 {
 } deriving Show
 
 fight :: Knight1 -> Monster1 -> Int
-fight knight@(Knight1 kHealth kAttack kGold) monster@(Monster1 mHealth mAttack mGold) =  -- RecordWildcards, maybe?
-  if monster1Health newMonster > 0
-    then
-      if knight1Health newKnight <= 0
-      then -1
-      else kGold
-  else
-    kGold + mGold
+fight knight@(Knight1 kHealth kAttack kGold) monster@(Monster1 mHealth mAttack mGold)
+  | monster1Health newMonster > 0 && knight1Health newKnight <= 0 = -1
+  | monster1Health newMonster > 0 = kGold
+  | otherwise = kGold + mGold
   where
     newMonster = monster { monster1Health = mHealth - kAttack }
     newKnight = knight { knight1Health = kHealth - mAttack }
--- Not really happy with the implementation. Maybe there's a simpler/more elegant variant
 
 {- |
 =🛡= Sum types
