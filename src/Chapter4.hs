@@ -482,7 +482,7 @@ instance Applicative (Secret e) where
     (<*>) :: Secret e (a -> b) -> Secret e a -> Secret e b
     (<*>) (Trap e) _ = Trap e
     (<*>) _ (Trap e) = Trap e
-    (<*>) (Reward f) (Reward a) = Reward (f a)
+    (<*>) (Reward f) r = f <$> r
 
 {- |
 =⚔️= Task 5
