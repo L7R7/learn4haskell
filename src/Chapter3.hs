@@ -1186,7 +1186,7 @@ fightContestants (a, b)
   | fightIsOver a && fightIsOver b = Draw
   | fightIsOver b = AWon a
   | fightIsOver a = BWon b
-  | otherwise = if fightIsOver newB then AWon newA else fightContestants (newA', newB')
+  | otherwise = fightContestants (newA', newB')
   where
     (newA, newB) = applyNextAction a b
     (newB', newA') = applyNextAction newB newA
