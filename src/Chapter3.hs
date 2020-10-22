@@ -1151,10 +1151,11 @@ data KnightAction = AttackContestant Attack | DrinkAHealthPotion Health | CastAS
 instance Contestant Knight where
   fightIsOver knight = knightHealth knight <= Health 0
   handleAttack knight attack = knight {knightHealth = calculateNewKnightHealth knight attack}
-  applyNextAction k@(Knight _ _ []) c = (k, c)
-  applyNextAction k@(Knight _ _  actions@(AttackContestant attack : _)) b = (k { knightActions = rotate actions}, handleAttack b attack)
-  applyNextAction k@(Knight health _ actions@(DrinkAHealthPotion moreHealth : _)) b = (k { knightHealth = health + moreHealth, knightActions = rotate actions}, b)
-  applyNextAction k@(Knight _ defense actions@(CastASpell moreDefense : _)) b = (k { knightDefense = defense + moreDefense, knightActions = rotate actions}, b)
+  applyNextAction k@(Knight health defense actions) contestant = case actions of
+    [] -> (k, contestant)
+    (AttackContestant attack : _) -> (k { knightActions = rotate actions}, handleAttack contestant attack)
+    (DrinkAHealthPotion moreHealth : _) -> (k { knightHealth = health + moreHealth, knightActions = rotate actions}, contestant)
+    (CastASpell moreDefense : _) -> (k { knightDefense = defense + moreDefense, knightActions = rotate actions}, contestant)
 
 calculateNewKnightHealth :: Knight -> Attack -> Health
 calculateNewKnightHealth (Knight (Health health) (Defense defense) _) (Attack attack) = Health (health + defense - attack)
@@ -1170,9 +1171,10 @@ instance Contestant Monster where
   fightIsOver (Monster _ (RunAway:_)) = True
   fightIsOver monster = monsterHealth monster <= 0
   handleAttack monster attack = monster {monsterHealth = calculateNewMonsterHealth monster attack}
-  applyNextAction m@(Monster _ []) c = (m, c)
-  applyNextAction m@(Monster _ (RunAway : _)) b = (m, b)
-  applyNextAction m@(Monster _ actions@(Fight attack : _)) b = (m { monsterActions = rotate actions}, handleAttack b attack)
+  applyNextAction m@(Monster _ actions) contestant = case actions of
+    [] -> (m, contestant)
+    (Fight attack : _) -> (m { monsterActions = rotate actions}, handleAttack contestant attack)
+    (RunAway : _) -> (m, contestant)
 
 calculateNewMonsterHealth :: Monster -> Attack -> Health
 calculateNewMonsterHealth (Monster (Health health) _) (Attack attack) = Health (health - attack)
